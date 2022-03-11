@@ -34,8 +34,11 @@ describe('[Challenge] Naive receiver', function () {
         /** CODE YOUR EXPLOIT HERE */   
         /**
          * I created an AttackNaiveReceiver contract, with method that runs lenders' method flashLoan with a loop as long as receiver has 1 eth.
-         * This is created, because neither lender or receiver check who is calling method flashLoan, so attacker can run flashLoan and beacue fee is 1 ETH
+         * This is created, because eceiver check who is the owner of the contract, so attacker can run flashLoan and because fee is 1 ETH
          * receiver will quickly loose all ethers.
+         * Receiver checks if the sender is pool, but that is not enough.
+         * 
+         * To remember: allways check who has right to has access to call contract's functions
          */
         const AttackNaiveReceiver = await ethers.getContractFactory('AttackNaiveReceiver', deployer);
         this.attack = await AttackNaiveReceiver.deploy();
