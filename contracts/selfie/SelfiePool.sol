@@ -5,6 +5,8 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Snapshot.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "./SimpleGovernance.sol";
+import "hardhat/console.sol";
+
 
 /**
  * @title SelfiePool

@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "../DamnValuableTokenSnapshot.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "hardhat/console.sol";
 
 /**
  * @title SimpleGovernance
@@ -58,6 +59,7 @@ contract SimpleGovernance {
         
         GovernanceAction storage actionToExecute = actions[actionId];
         actionToExecute.executedAt = block.timestamp;
+
 
         actionToExecute.receiver.functionCallWithValue(
             actionToExecute.data,
