@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "./TrustfulOracle.sol";
 import "../DamnValuableNFT.sol";
+import "hardhat/console.sol";
 
 /**
  * @title Exchange
@@ -27,6 +28,7 @@ contract Exchange is ReentrancyGuard {
     }
 
     function buyOne() external payable nonReentrant returns (uint256) {
+
         uint256 amountPaidInWei = msg.value;
         require(amountPaidInWei > 0, "Amount paid must be greater than zero");
 
@@ -39,11 +41,12 @@ contract Exchange is ReentrancyGuard {
         payable(msg.sender).sendValue(amountPaidInWei - currentPriceInWei);
 
         emit TokenBought(msg.sender, tokenId, currentPriceInWei);
-
+        console.log("BUY ONE");
         return tokenId;
     }
 
     function sellOne(uint256 tokenId) external nonReentrant {
+        console.log("SELL ONE");
         require(msg.sender == token.ownerOf(tokenId), "Seller must be the owner");
         require(token.getApproved(tokenId) == address(this), "Seller must have approved transfer");
 
