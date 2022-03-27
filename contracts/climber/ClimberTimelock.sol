@@ -99,11 +99,12 @@ contract ClimberTimelock is AccessControl {
         require(targets.length == values.length);
         require(targets.length == dataElements.length);
 
-        bytes32 id = getOperationId(targets, values, dataElements, salt);
 
+        bytes32 id = getOperationId(targets, values, dataElements, salt);
         for (uint8 i = 0; i < targets.length; i++) {
             targets[i].functionCallWithValue(dataElements[i], values[i]);
         }
+
         
         require(getOperationState(id) == OperationState.ReadyForExecution);
         operations[id].executed = true;
